@@ -623,75 +623,70 @@
          </div>
       </div>
       <!-- copyright section end -->
-      <!-- Javascript files-->
-      <script src="js/jquery.min.js"></script>
-      <script src="js/popper.min.js"></script>
-      <script src="js/bootstrap.bundle.min.js"></script>
-      <script src="js/jquery-3.0.0.min.js"></script>
-      <script src="js/plugin.js"></script>
-      <!-- sidebar -->
-      <script src="js/jquery.mCustomScrollbar.concat.min.js"></script>
-      <script src="js/custom.js"></script>
-      <script>
-         function openNav() {
-           document.getElementById("mySidenav").style.width = "250px";
-         }
-         
-         function closeNav() {
-           document.getElementById("mySidenav").style.width = "0";
-         }
-      </script>
+         <!-- Javascript files-->
+         <script src="js/jquery.min.js"></script>
+         <script src="js/popper.min.js"></script>
+         <script src="js/bootstrap.bundle.min.js"></script>
+         <script src="js/plugin.js"></script>
+         <script src="js/jquery.mCustomScrollbar.concat.min.js"></script>
+         <script src="js/custom.js"></script>
 
-      <!-- Chatbot Container -->
-      <div id="chatbot-container" style="position: fixed; bottom: 20px; right: 20px; width: 300px;">
-         <div id="chatbot-header" style="background-color: #007bff; color: white; padding: 10px; cursor: pointer; border-radius: 50%; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
-            <img src="images/chatbot-icon.png" alt="Chatbot Icon" style="width: 30px; height: 30px;">
+         <!-- Chatbot Container -->
+         <div id="chatbot-container" style="position: fixed; bottom: 20px; right: 20px; width: 300px;">
+            <div id="chatbot-header" style="background-color: #007bff; color: white; padding: 10px; cursor: pointer; border-radius: 50%; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
+               <img src="images/chatbot-icon.png" alt="Chatbot Icon" style="width: 30px; height: 30px;">
+            </div>
+            <div id="chatbot-body" style="background-color: #f1f1f1; height: 300px; overflow-y: scroll; display: none; border: 1px solid #007bff; border-radius: 10px; padding: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+               <div id="chat-messages" style="padding: 10px; height: 220px;"></div>
+               <input type="text" id="chat-input" style="width: 100%; padding: 10px;" placeholder="Type a message...">
+               <button id="send-btn" style="width: 100%; padding: 10px; background-color: #007bff; color: white;">Send</button>
+            </div>
          </div>
-         <div id="chatbot-body" style="background-color: #f1f1f1; height: 300px; overflow-y: scroll; display: none; border: 1px solid #007bff; border-radius: 10px; padding: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-            <div id="chat-messages" style="padding: 10px; height: 220px;"></div>
-            <input type="text" id="chat-input" style="width: 100%; padding: 10px;" placeholder="Type a message...">
-            <button id="send-btn" style="width: 100%; padding: 10px; background-color: #007bff; color: white;">Send</button>
-         </div>
-      </div>
 
-      <script>
-         document.getElementById('chatbot-header').addEventListener('click', function () {
-             const chatbotBody = document.getElementById('chatbot-body');
-             chatbotBody.style.display = chatbotBody.style.display === 'none' ? 'block' : 'none';
-         });
-     
-         document.getElementById('send-btn').addEventListener('click', function () {
-             const inputField = document.getElementById('chat-input');
-             const userMessage = inputField.value;
-     
-             if (userMessage.trim()) {
-                 appendMessage('You', userMessage);
-                 inputField.value = '';
-     
-                 // Send the message to the backend (LLM API)
-                 fetch('/chatbot', {
-                     method: 'POST',
-                     headers: { 'Content-Type': 'application/json' },
-                     body: JSON.stringify({ message: userMessage })
-                 })
-                 .then(response => response.json())
-                 .then(data => {
-                     appendMessage('Bot', data.reply);
-                 })
-                 .catch(error => {
-                     appendMessage('Bot', 'Error occurred. Please try again.');
-                 });
-             }
-         });
-     
-         function appendMessage(sender, message) {
-             const chatMessages = document.getElementById('chat-messages');
-             const messageElement = document.createElement('div');
-             messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
-             chatMessages.appendChild(messageElement);
-             chatMessages.scrollTop = chatMessages.scrollHeight;
-         }
-     </script>
+         <script>
+            document.addEventListener('DOMContentLoaded', function() {
+               document.getElementById('chatbot-header').addEventListener('click', function () {
+                  const chatbotBody = document.getElementById('chatbot-body');
+                  chatbotBody.style.display = chatbotBody.style.display === 'none' ? 'block' : 'none';
+               });
+
+               document.getElementById('send-btn').addEventListener('click', function () {
+                  const inputField = document.getElementById('chat-input');
+                  const userMessage = inputField.value;
+
+                  if (userMessage.trim()) {
+                     appendMessage('You', userMessage);
+                     inputField.value = '';
+
+                     // Send the message to the backend (Flask server)
+                     fetch('http://127.0.0.1:5000/chatbot', {  
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: userMessage })
+                     })
+                     .then(response => response.json())
+                     .then(data => {
+                        appendMessage('Bot', data.reply);
+                     })
+                     .catch(error => {
+                        console.error('Error:', error);  // Better error logging
+                        appendMessage('Bot', 'Error occurred. Please try again.');
+                     });
+                  } else {
+                     alert('Please enter a message!');
+                  }
+               });
+
+               function appendMessage(sender, message) {
+                  const chatMessages = document.getElementById('chat-messages');
+                  const messageElement = document.createElement('div');
+                  messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
+                  chatMessages.appendChild(messageElement);
+                  chatMessages.scrollTop = chatMessages.scrollHeight;
+               }
+            });
+         </script>
+
      
 
    </body>
